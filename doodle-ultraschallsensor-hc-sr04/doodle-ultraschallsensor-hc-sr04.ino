@@ -30,6 +30,7 @@ void setup()
   pinMode(ECHO, INPUT);
   pinMode(BUZZER, OUTPUT);
   digitalWrite(TRIGGER, HIGH); //Signal abschalten
+  digitalWrite(TRIGGER, HIGH);
 
   Serial.begin(57600);
 
