@@ -6,8 +6,10 @@
 
 #define NUM_LEDS 1
 #define DATA_PIN 9
+#define BUZZER 6
 
 #define MEASURE_INTERVAL 20 // milliseconds a measurement should happen, max. HC-SR04 is 50 per second
+#define MIN_DISTANCE_CM 100
 
 #define DEBUG 0
 
@@ -26,6 +28,7 @@ void setup()
 {
   pinMode(TRIGGER, OUTPUT);
   pinMode(ECHO, INPUT);
+  pinMode(BUZZER, OUTPUT);
   digitalWrite(TRIGGER, HIGH); //Signal abschalten
 
   Serial.begin(57600);
@@ -49,6 +52,12 @@ int getDistanceInCentimeter()
   return (distance);
 }
 
+unsigned long rounding_filter(unsigned long l)
+{
+  if (l % 10 > 5) return (l / 10) * 10 + 1;
+  return (l / 10) * 10;
+}
+
 void loop()
 {
   time = millis();
@@ -63,13 +72,16 @@ void loop()
       Serial.print(distance, DEC);
       Serial.write(" cm\n");
     }
-    
-    distance = (distance / 10) * 10;
-    if (distance != last_distance)
+
+    distance = rounding_filter(distance);
+    if (distance != last_distance && distance < MIN_DISTANCE_CM)
     {
       last_distance = distance;
+      if (!signal_LED)
+      {
+        last_LED_anim = time;
+      }
       signal_LED = true;
-      last_LED_anim = time;
     }
   }
 
@@ -80,15 +92,17 @@ void loop()
     {
       signal_LED = false;
       leds[0] = CRGB::Black;
+      noTone(BUZZER);
     }
     else if (delta > 0)
     {
-      int val = 255 - abs(map(delta, 0, 2000, -255, 255));
-      leds[0].r = val;
+      leds[0].r = 255 - abs(map(delta, 0, 2000, -255, 255));
+      tone(BUZZER, 2000 + abs(map(delta, 0, 2000, -1000, 1000)));
     }
     FastLED.show();
   }
 }
+
 
 
 
