@@ -1,17 +1,20 @@
 #include <FastLED.h>
 
-#define TRIGGER 3 // Arduino Pin --> HC-SR04 Trig
-#define ECHO 2    // Arduino Pin --> HC-SR04 Echo
+#define TRIGGER 13 // Arduino Pin --> HC-SR04 Trig
+#define ECHO 12    // Arduino Pin --> HC-SR04 Echo
 #define PULSE_TO_CM_DIVIDER 58 // from HC-SR04 User's Manual v1.0
 
-#define NUM_LEDS 1
-#define DATA_PIN 9
+#define NUM_LEDS 24
+#define LED_PIN 9
 #define BUZZER 6
 
 #define MEASURE_INTERVAL 20 // milliseconds a measurement should happen, max. HC-SR04 is 50 per second
-#define MIN_DISTANCE_CM 100
+#define MIN_DISTANCE_CM 20
+#define MAX_DISTANCE_CM 50
 
-#define DEBUG 0
+#define FLY_THROUGH_GRACE_PERIOD 1000
+
+#define DEBUG 1
 
 //--------------------------------
 
@@ -19,10 +22,10 @@
 CRGB leds[NUM_LEDS];
 
 unsigned long last_measured = 0;
-unsigned long last_LED_anim = 0;
+unsigned long flyThroughAt = 0;
 unsigned long time = 0;
 int last_distance = 0;
-bool signal_LED = false;
+bool flyThroughDetected = false;
 
 void setup()
 {
@@ -34,7 +37,7 @@ void setup()
 
   Serial.begin(57600);
 
-  FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
   time = millis();
 }
 
@@ -59,6 +62,34 @@ unsigned long rounding_filter(unsigned long l)
   return (l / 10) * 10;
 }
 
+void makeNoise() {
+  int delta = (time - flyThroughAt);
+  if (delta > 500)
+  {
+    // flyThroughDetected = false;
+    noTone(BUZZER);
+  }
+  else if (delta > 0)
+  {
+    tone(BUZZER, 2000 + abs(map(delta, 0, 500, -1000, 1000)));
+  }
+
+}
+
+void makeLight() {
+  int delta = (time - flyThroughAt);
+  if (delta > 500)
+  {
+    leds[0] = CRGB::Black;
+    FastLED.show();
+  }
+  else if (delta > 0)
+  {
+    leds[0].r = 255 - abs(map(delta, 0, 500, -255, 255));
+    FastLED.show();
+  }
+}
+
 void loop()
 {
   time = millis();
@@ -74,34 +105,31 @@ void loop()
       Serial.write(" cm\n");
     }
 
-    distance = rounding_filter(distance);
-    if (distance != last_distance && distance < MIN_DISTANCE_CM)
+    //    distance = rounding_filter(distance);
+    //    if (distance != last_distance && distance < MIN_DISTANCE_CM)
+    if (MIN_DISTANCE_CM < distance && distance < MAX_DISTANCE_CM)
     {
-      last_distance = distance;
-      if (!signal_LED)
+      //      last_distance = distance;
+      if (!flyThroughDetected)
       {
-        last_LED_anim = time;
+        flyThroughAt = time;
       }
-      signal_LED = true;
+      flyThroughDetected = true;
     }
   }
 
-  if (signal_LED)
+  if (flyThroughDetected)
   {
-    int delta = (time - last_LED_anim);
-    if (delta > 2000)
+    int delta = (time - flyThroughAt);
+    if (delta > FLY_THROUGH_GRACE_PERIOD)
     {
-      signal_LED = false;
-      leds[0] = CRGB::Black;
-      noTone(BUZZER);
+      flyThroughDetected = false;
     }
-    else if (delta > 0)
-    {
-      leds[0].r = 255 - abs(map(delta, 0, 2000, -255, 255));
-      tone(BUZZER, 2000 + abs(map(delta, 0, 2000, -1000, 1000)));
-    }
-    FastLED.show();
   }
+
+  makeLight();
+  makeNoise();
+
 }
 
 
