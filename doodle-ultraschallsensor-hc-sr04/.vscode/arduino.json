@@ -1,7 +1,0 @@
-{
-    "board": "arduino:avr:nano",
-    "configuration": "cpu=atmega168",
-    "sketch": "doodle-ultraschallsensor-hc-sr04.ino",
-    "output": "output",
-    "port": "COM11"
-}
