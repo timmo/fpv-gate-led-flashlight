@@ -9,9 +9,9 @@
 
 #define NUM_LEDS 24
 
-#define MEASURE_INTERVAL 80 // milliseconds a measurement should happen, max. HC-SR04 is 50 per second
-#define MIN_DISTANCE_CM 25
-#define MAX_DISTANCE_CM 55
+#define MEASURE_INTERVAL 20 // milliseconds a measurement should happen, max. HC-SR04 is 50 per second
+#define MIN_DISTANCE_CM 20
+#define MAX_DISTANCE_CM 40
 
 #define FLY_THROUGH_GRACE_PERIOD 1000
 
@@ -89,7 +89,7 @@ void makeLight() {
   else if (delta > 400)
   {
     int value = abs(map(delta, 400, 500, 0, 125));
-    
+
     for (int i = 0; i < NUM_LEDS; i++) {
       leds[i] = CHSV( 190, 255, value);
 
@@ -99,7 +99,7 @@ void makeLight() {
   else if (delta > 100)
   {
     int value = 255 - abs(map(delta, 100, 400, -255, 255));
-    
+
     for (int i = 0; i < NUM_LEDS; i++) {
       leds[i] = CHSV( 0, 255, value);
 
@@ -109,7 +109,7 @@ void makeLight() {
   else if (delta > 0)
   {
     int value = abs(map(delta, 0, 100, 125, 0));
-    
+
     for (int i = 0; i < NUM_LEDS; i++) {
       leds[i] = CHSV( 190, 255, value);
 
@@ -128,9 +128,28 @@ void loop()
     int distance = getDistanceInCentimeter();
     if (DEBUG)
     {
-      Serial.write("distance:");
-      Serial.print(distance, DEC);
-      Serial.write(" cm\n");
+      //      Serial.write("distance:");
+      //      Serial.print(distance, DEC);
+      //      Serial.write(" cm\n");
+      for (int i = 1; i <= 80; i++) {
+        if (i == MAX_DISTANCE_CM || i == MIN_DISTANCE_CM) {
+          Serial.write("+");
+        }
+        else if (i % 10 == 0) {
+//          Serial.print(i, DEC);
+          Serial.write("||");
+        }
+        else if (i % 5 == 0) {
+          Serial.write("|");
+        }
+        else if (i <= distance) {
+          Serial.write("-");
+        }
+        else {
+          Serial.write(" ");
+        }
+      }
+      Serial.write("\n");
     }
 
     //    distance = rounding_filter(distance);
