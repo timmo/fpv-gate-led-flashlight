@@ -1,16 +1,17 @@
 #include <FastLED.h>
 
-#define TRIGGER 13 // Arduino Pin --> HC-SR04 Trig
-#define ECHO 12    // Arduino Pin --> HC-SR04 Echo
 #define PULSE_TO_CM_DIVIDER 58 // from HC-SR04 User's Manual v1.0
 
-#define NUM_LEDS 24
-#define LED_PIN 9
-#define BUZZER 6
+#define TRIGGER 3 // Arduino Pin --> HC-SR04 Trig
+#define ECHO 2    // Arduino Pin --> HC-SR04 Echo
+#define LED_PIN 6
+#define BUZZER 4
 
-#define MEASURE_INTERVAL 20 // milliseconds a measurement should happen, max. HC-SR04 is 50 per second
-#define MIN_DISTANCE_CM 20
-#define MAX_DISTANCE_CM 50
+#define NUM_LEDS 24
+
+#define MEASURE_INTERVAL 80 // milliseconds a measurement should happen, max. HC-SR04 is 50 per second
+#define MIN_DISTANCE_CM 25
+#define MAX_DISTANCE_CM 55
 
 #define FLY_THROUGH_GRACE_PERIOD 1000
 
