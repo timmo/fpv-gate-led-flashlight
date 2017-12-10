@@ -81,39 +81,25 @@ void makeLight() {
   int delta = (time - flyThroughAt);
   if (delta > 500)
   {
-    for (int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CHSV( 190, 255, 125);;
-    }
+    fill_solid(leds, NUM_LEDS, CHSV( 190, 255, 125));
     FastLED.show();
   }
   else if (delta > 400)
   {
     int value = abs(map(delta, 400, 500, 0, 125));
-
-    for (int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CHSV( 190, 255, value);
-
-    }
+    fill_solid(leds, NUM_LEDS, CHSV( 190, 255, value));
     FastLED.show();
   }
   else if (delta > 100)
   {
     int value = 255 - abs(map(delta, 100, 400, -255, 255));
-
-    for (int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CHSV( 0, 255, value);
-
-    }
+    fill_solid(leds, NUM_LEDS, CHSV( 0, 255, value));
     FastLED.show();
   }
   else if (delta > 0)
   {
     int value = abs(map(delta, 0, 100, 125, 0));
-
-    for (int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CHSV( 190, 255, value);
-
-    }
+    fill_solid(leds, NUM_LEDS, CHSV( 190, 255, value));
     FastLED.show();
   }
 }
